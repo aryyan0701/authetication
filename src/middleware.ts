@@ -1,23 +1,21 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt"; // Import to check authentication token
+
 export { default } from "next-auth/middleware";
-import { getToken } from "next-auth/jwt";
 
 // This function can be marked `async` if using `await` inside
 export async function middleware(request: NextRequest) {
-
-  const token = await getToken({req: request});
+  const token = await getToken({ req: request });
   const url = request.nextUrl;
 
-  if (token && (
-    url.pathname.startsWith('/sign-in') ||
-    url.pathname.startsWith('/sign-up') ||
-    url.pathname === '/'
-  )) {
+  // If the user is logged in and they try to access sign-in, sign-up, or home, redirect them to the dashboard
+  if (token && (url.pathname.startsWith('/sign-in') || url.pathname.startsWith('/sign-up') || url.pathname === '/')) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  if(!token && url.pathname.startsWith('/dashboard')){
+  // If the user is not logged in and they try to access the dashboard, redirect them to sign-in
+  if (!token && url.pathname.startsWith('/dashboard')) {
     return NextResponse.redirect(new URL("/sign-in", request.url));
   }
 }

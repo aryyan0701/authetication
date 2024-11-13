@@ -10,7 +10,6 @@ import { useRouter } from "next/navigation";
 import { signUpSchema } from "@/schemas/signUpSchema";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "@/types/ApiResponse";
-import { toast } from "@/hooks/use-toast";
 import {
   Form,
   FormControl,
@@ -22,6 +21,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { ClipLoader } from "react-spinners";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast"
+
 
 const page = () => {
   const [username, setUsername] = useState("");
@@ -31,6 +32,7 @@ const page = () => {
 
   const debounced = useDebounceCallback(setUsername, 500);
   const router = useRouter();
+  const { toast } = useToast()
 
   //zod implmentation
   const form = useForm<z.infer<typeof signUpSchema>>({
@@ -69,36 +71,38 @@ const page = () => {
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
     setIsSubmitting(true);
-
+  
     try {
       const response = await axios.post<ApiResponse>("/api/sign-up", data);
       toast({
-        title: "success",
+        title: "Success",
         description: response.data.message,
+        variant: "default",
+        className: "bg-green-500 text-white",
       });
-      router.replace("/dashboard/");
-      setIsSubmitting(false);
+      router.replace("/dashboard");
     } catch (error) {
       console.error("Error in sign up user", error);
       const axiosError = error as AxiosError<ApiResponse>;
-      let errorMessage = axiosError.response?.data.message;
+      const errorMessage = axiosError.response?.data.message ?? "Sign up failed";
       toast({
         title: "Sign up Failed",
         description: errorMessage,
         variant: "destructive",
       });
+    } finally {
       setIsSubmitting(false);
     }
   };
+  
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
-      <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
+    <div className="flex justify-center items-center min-h-screen bg-slate-900">
+      <div className="w-full max-w-md p-8 space-y-8 bg-gray-100 rounded-lg shadow-md">
         <div className="text-center">
-          <h1 className="text-4xl font-extrabold tracking-tight lg:text-5xl mb-6">
-            join mystry message
+          <h1 className="text-4xl font-extrabold tracking-tight lg:text-4xl mb-6">
+         Register Yourself
           </h1>
-          <p className="mb-4">sign up to start you advetures journey</p>
         </div>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -167,7 +171,7 @@ const page = () => {
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? (
                 <>
-                  <ClipLoader size={30} color="#123abc" loading={true} />
+                  <ClipLoader size={30} color="#fff" loading={true} />
                 </>
               ) : (
                 "Sign up"

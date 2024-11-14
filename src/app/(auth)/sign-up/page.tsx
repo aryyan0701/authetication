@@ -21,7 +21,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { ClipLoader } from "react-spinners";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast"
+import { useToast } from "@/hooks/use-toast";
 
 
 const page = () => {
@@ -80,7 +80,7 @@ const page = () => {
         variant: "default",
         className: "bg-green-500 text-white",
       });
-      router.replace("/dashboard");
+      // router.replace("/dashboard");
     } catch (error) {
       console.error("Error in sign up user", error);
       const axiosError = error as AxiosError<ApiResponse>;
@@ -181,9 +181,9 @@ const page = () => {
         </Form>
         <div className="text-center mt-4">
           <p>
-            Already a member..?{" "}
+            Already have an account..?{" "}
             <Link href="/sign-in" className="text-blue-600 hover:text-blue-800">
-              Sign In
+              Sign-In
             </Link>
           </p>
         </div>

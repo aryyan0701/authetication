@@ -80,7 +80,7 @@ const page = () => {
         variant: "default",
         className: "bg-green-500 text-white",
       });
-      // router.replace("/dashboard");
+      router.push("/dashboard");
     } catch (error) {
       console.error("Error in sign up user", error);
       const axiosError = error as AxiosError<ApiResponse>;

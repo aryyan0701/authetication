@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInSchema } from "@/schemas/sigInSchema";
 import axios, { AxiosError } from "axios";
@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { ClipLoader } from "react-spinners";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { signIn } from "next-auth/react";
 
 const Page = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,53 +33,42 @@ const Page = () => {
   const form = useForm<z.infer<typeof signInSchema>>({
     resolver: zodResolver(signInSchema),
     defaultValues: {
-      username: "",
+      identifier: "",
       password: "",
     },
   });
 
-  useEffect(() => {
-    if(isLoggedIn){
-      router.push('/dashboard')
-    }
-  },[isLoggedIn, router])
-
   const onSubmit = async (data: z.infer<typeof signInSchema>) => {
     setIsSubmitting(true);
+  
+    const result = await signIn("credentials", {
+      redirect: false,
+      identifier: data.identifier,
+      password: data.password,
+    });
 
-    try {
-      const response = await axios.post<ApiResponse>("/api/sign-in", data);
-      
-      if (response.status === 200) { 
-        toast({
-          title: "Success",
-          description: response.data.message,
-          variant: "default",
-          className: "bg-green-500 text-white",
-        });
-        setIsLoggedIn(true)
-        router.push("/dashboard");
-      } else {
-        toast({
-          title: "Sign-in Failed",
-          description: response.data.message,
-          variant: "destructive",
-        });
-      }
-
-    } catch (error) {
-      console.error("Error in sign-up user", error);
-      const axiosError = error as AxiosError<ApiResponse>;
-      const errorMessage = axiosError.response?.data.message ?? "Sign up failed";
-      toast({
-        title: "Sign-up Failed",
-        description: errorMessage,
+    console.log("SignIn result:", result);
+    setIsSubmitting(false); // reset submit state after response
+  
+    if (result?.error) {
+      toast({  
+        title: "Login Failed",
+        description: "Incorrect username or password",
         variant: "destructive",
       });
-    } finally {
-      setIsSubmitting(false);
+      return;
+    }
+  
+    if (result?.ok) {
+      toast({
+        title: "Login Successful",
+        description: "Redirecting to dashboard...",
+        className: "bg-green-500 text-white",
+      });
+      router.replace("/dashboard");
     }
   };
+  
 
   
 
@@ -93,13 +83,13 @@ const Page = () => {
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             <FormField
-              name="username"
+              name="identifier"
               control={form.control}
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Username</FormLabel>
+                  <FormLabel>UserName/Email</FormLabel>
                   <FormControl>
-                    <Input placeholder="username" {...field} />
+                    <Input placeholder="username/email" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>

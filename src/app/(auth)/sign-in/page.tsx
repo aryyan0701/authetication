@@ -7,8 +7,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signInSchema } from "@/schemas/sigInSchema";
-import axios, { AxiosError } from "axios";
-import { ApiResponse } from "@/types/ApiResponse";
 import {
   Form,
   FormControl,
@@ -46,28 +44,32 @@ const Page = () => {
       identifier: data.identifier,
       password: data.password,
     });
-
-    console.log("SignIn result:", result);
-    setIsSubmitting(false); // reset submit state after response
+  
+    console.log("SignIn result:", result); 
+    setIsSubmitting(false);
   
     if (result?.error) {
-      toast({  
+      toast({
         title: "Login Failed",
         description: "Incorrect username or password",
         variant: "destructive",
       });
       return;
-    }
+    } else {
+        router.push('/dashboard')
+      }
+
   
-    if (result?.ok) {
-      toast({
-        title: "Login Successful",
-        description: "Redirecting to dashboard...",
-        className: "bg-green-500 text-white",
-      });
-      router.replace("/dashboard");
-    }
+    // if (result?.ok) {
+    //   toast({
+    //     title: "Login Successful",
+    //     description: "Redirecting to dashboard...",
+    //     className: "bg-green-500 text-white",
+    //   });
+    //   router.replace("/dashboard");
+    // }
   };
+  
   
 
   

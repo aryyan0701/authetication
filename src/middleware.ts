@@ -1,28 +1,22 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-export { default } from 'next-auth/middleware';
+import type { NextRequest } from 'next/server';
 
-export const config = {
-  matcher: ['/dashboard/:path*', '/sign-in', '/sign-up', '/'],
-};
+export async function middleware(req: NextRequest) {
+  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  console.log("Middleware Token:", token); // Debug token
 
-export async function middleware(request: NextRequest) {
-  const token = await getToken({ req: request });
-  const url = request.nextUrl;
+  const isLoggedIn = !!token;
+  const url = req.nextUrl.clone();
 
-  // Redirect to dashboard if the user is already authenticated
-  // and trying to access sign-in, sign-up, or home page
-  if (
-    token &&
-    (url.pathname.startsWith('/sign-in') ||
-      url.pathname.startsWith('/sign-up') ||
-      url.pathname === '/')
-  ) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+  if (req.nextUrl.pathname.startsWith('/sign-in') && isLoggedIn) {
+    url.pathname = '/dashboard';
+    return NextResponse.redirect(url);
   }
 
-  if (!token && url.pathname.startsWith('/dashboard')) {
-    return NextResponse.redirect(new URL('/sign-in', request.url));
+  if (req.nextUrl.pathname.startsWith('/dashboard') && !isLoggedIn) {
+    url.pathname = '/sign-in';
+    return NextResponse.redirect(url);
   }
 
   return NextResponse.next();

@@ -14,7 +14,7 @@ export async function POST(request: Request) {
       return Response.json(
         {
           success: false,
-          message: "Email is already existed",
+          message: "User already exists",
         },
         { status: 400 }  
       );

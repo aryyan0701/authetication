@@ -1,4 +1,4 @@
-import { NextAuthOptions } from 'next-auth';
+import NextAuth, { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from "next-auth/providers/credentials";
 import dbConnect from '@/lib/dbConnect';
 import UserModel from '@/model/User';
@@ -40,28 +40,50 @@ export const authOptions: NextAuthOptions = {
             }
         })
     ],
-    callbacks: {
-        async jwt({ token, user }) {
-            if (user && user._id && user.username) {
-                token._id = user._id.toString();
-                token.username = user.username;
-            }
-            console.log(token)
-            return token;
-        },
-        async session({ session, token }) {
-            if (token) {
-                session.user._id = token._id;
-                session.user.username = token.username;
-            }
-            return session;
-        }
-    },
-    pages: {
-        signIn: "/sign-in" 
-    },
     session: {
         strategy: "jwt" 
     },
-    secret: process.env.NEXTAUTH_SECRETKEY 
+     callbacks: {
+    async jwt({ token, user }) {
+    console.log("JWT Callback - Token before:", token);
+      if (user) {
+        token.id = user.id
+        token.email = user.email;
+      }
+      console.log("JWT Callback - Token after:", token);
+      return token
+    },
+    async session({ session, token }) {
+        console.log("Session Callback - Token:", token);
+      if (session.user) {
+        session.user._id = token.id as string
+        session.user.email = token.email;
+    }
+    console.log("Session Callback - Session:", session);
+      return session
+    },
+  },
+    // callbacks: {
+    //     async jwt({ token, user }) {
+    //         if (user && user._id && user.username) {
+    //             token._id = user._id.toString();
+    //             token.username = user.username;
+    //         }
+    //         console.log("JWT Token:", token); 
+    //         return token;
+    //     },
+    //     async session({ session, token }) {
+    //         if (token) {
+    //             session.user._id = token._id;
+    //             session.user.username = token.username;
+    //         }
+    //          console.log("Session:", session);
+    //         return session;
+    //     }
+    // },
+    pages: {
+        signIn: "/sign-in" 
+    },
+    secret: process.env.NEXTAUTH_SECRET
 };
+

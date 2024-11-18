@@ -19,11 +19,10 @@ import { Input } from "@/components/ui/input";
 import { ClipLoader } from "react-spinners";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { signIn } from "next-auth/react";
+import { signIn } from "@/auth";
 
 const Page = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -56,18 +55,13 @@ const Page = () => {
       });
       return;
     } else {
+      toast({
+        title: "Login Successful",
+        description: "Redirecting to dashboard...",
+        className: "bg-green-500 text-white",
+      });
         router.push('/dashboard')
       }
-
-  
-    // if (result?.ok) {
-    //   toast({
-    //     title: "Login Successful",
-    //     description: "Redirecting to dashboard...",
-    //     className: "bg-green-500 text-white",
-    //   });
-    //   router.replace("/dashboard");
-    // }
   };
   
   

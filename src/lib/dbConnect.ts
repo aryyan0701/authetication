@@ -12,11 +12,11 @@ async function dbConnect(): Promise<void> {
         return;
     }
 
-      const mongoUri = process.env.MONGODB_URI;
-      if (!mongoUri) {
-          console.error("MongoDB connection URI is missing");
-          process.exit(1);
-      }
+    const mongoUri = process.env.MONGODB_URI;
+    if (!mongoUri) {
+        console.error("MongoDB connection URI is missing");
+        process.exit(1);
+    }
 
     try {
         const db = await mongoose.connect(mongoUri);

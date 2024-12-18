@@ -2,30 +2,34 @@ import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req: Request) {
-  // Extract the pathname from the request URL
+  const secret = process.env.NEXTAUTH_SECRET;
+
+  if (!secret) {
+    console.error("NEXTAUTH_SECRET is not defined. Check your .env.local file.");
+    return NextResponse.redirect(new URL('/sign-in', req.url));
+  }
+
   const { pathname } = new URL(req.url);
 
-  // Define the protected routes
-  const protectedRoutes = ['/dashboard', '/profile']; // Add all protected paths here
+  const protectedRoutes = ['/dashboard', '/profile']; 
 
-  // If the pathname is not in protected routes, allow the request
   if (!protectedRoutes.some((route) => pathname.startsWith(route))) {
     return NextResponse.next();
   }
 
-  // Get the token using the NextAuth secret
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
+  try {
+    const token = await getToken({ req, secret });
 
-  // If token exists, allow the request
-  if (token) {
-    return NextResponse.next();
+    if (token) {
+      return NextResponse.next();
+    }
+  } catch (error) {
+    console.error("Error retrieving token:", error);
   }
 
-  // If no token is found, redirect to the sign-in page
   return NextResponse.redirect(new URL('/sign-in', req.url));
 }
 
-// Apply middleware to all routes
 export const config = {
-  matcher: ['/dashboard/:path*', '/profile/:path*'], // Add all protected paths here
+  matcher: ['/dashboard/:path*', '/profile/:path*'], 
 };

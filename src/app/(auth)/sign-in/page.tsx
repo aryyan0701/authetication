@@ -19,7 +19,8 @@ import { Input } from "@/components/ui/input";
 import { ClipLoader } from "react-spinners";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { signIn } from "@/auth";
+import { signIn } from "next-auth/react";
+
 
 const Page = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,7 +45,7 @@ const Page = () => {
       password: data.password,
     });
   
-    console.log("SignIn result:", result); 
+    // console.log("SignIn result:", result); 
     setIsSubmitting(false);
   
     if (result?.error) {
